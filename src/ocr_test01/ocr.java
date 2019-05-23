@@ -13,6 +13,23 @@ public class ocr {
 	public int size = 0;
 	
 	/*
+	 * 边框变白
+	 */
+	public static void setFrameWhite(Mat img,int frameLength) {
+		for(int i=0;i<img.width();i++) {
+			for(int j=0;j<frameLength;j++)
+				img.put(j, i, 255);
+			for(int j=img.height();j>img.height()-frameLength;j--)
+				img.put(j, i, 255);
+		}
+		for(int j=0;j<img.height();j++) {
+			for(int i=0;i<frameLength;i++)
+				img.put(j, i, 255);
+			for(int i=img.width()-1;i>img.width()-frameLength;i--)
+				img.put(j, i, 255);
+		}
+	}
+	/*
 	 * 对图片按行或者按列统计黑色像素的多少
 	 * 输入：img@Mat,xy@boolean
 	 * xy为true是按行统计
@@ -93,7 +110,7 @@ public class ocr {
 	    }
 
 	    Mat curve = new Mat();
-	    Mat src = img;
+	    Mat src = img.clone();
 	    curve.create(new Size(nWidth,nHeight), CvType.CV_8UC1);
 	    for(int k=0;k<nHeight;k++)
 	    {
@@ -103,12 +120,17 @@ public class ocr {
 	    for(i=0;i < cutY.size();i++)
 	    {
 	    	for(j=0;j<nWidth;j++) {
-//	    		src.put(cutY.get(i), j, 128);
+	    		src.put(cutY.get(i), j, 128);
 	    		curve.put(cutY.get(i), j, 128);
 	    	}
 	    }
-//	    ShowImage linepic = new ShowImage(src);
-//	    linepic.getFrame().setVisible(true);
+	    ShowImage linepic = new ShowImage(src);
+	    linepic.getFrame().setVisible(true);
+	    linepic.getFrame().setTitle("分割线示意");
+	    
+	    ShowImage lineCpic = new ShowImage(curve);
+	    lineCpic.getFrame().setVisible(true);
+	    lineCpic.getFrame().setTitle("投影像素示意");
 	    // 把切割的图片都保存到YMat中
 	    List<Mat> YMat = new ArrayList<Mat>();
 	    int startY = 0;
@@ -135,7 +157,7 @@ public class ocr {
 	    }
 	    startY = cutY.get(i - 1);
 	    height = nHeight - startY;
-	    if(height>nHeight/5)
+	    if(height>nHeight/6)
         {
         Mat temp = new Mat(img, new Rect(0, startY, nWidth, height));
         Mat t = new Mat();
@@ -179,15 +201,18 @@ public class ocr {
 	        	}
 	        	}
 	    }
-	    Mat src1 = img;
+	    Mat src1 = img.clone();
+	    
 	    for(i=0;i < cutX.size();i++)
 	    {
 	    	for(j=0;j<nHeight;j++) {
-//	    		src1.put(j,cutX.get(i), 128);
+	    		src1.put(j,cutX.get(i), 128);
 	    	}
 	    }
-//	    ShowImage charpic = new ShowImage(src1);
-//	    charpic.getFrame().setVisible(true);
+	    ShowImage charpic = new ShowImage(src1);
+	    charpic.getFrame().setVisible(true);
+	    charpic.getFrame().setTitle("字符分割情况");
+	    
 	    
 	 // 把切割的图片都保存到YMat中
 	    List<Mat> XMat = new ArrayList<Mat>();
@@ -295,16 +320,16 @@ public class ocr {
 	    temp2 = average(yNum);
 	    
 //	    int area = img.height()*img.width();
-	    int threshFilt = nWidth/30;
+	    int threshFilt = nWidth/10;
 //	    System.out.println("temp1: "+temp1+", temp2: "+temp2+",area:"+area);
 	    //判断是否为空白图片
 	    if(temp1<=threshFilt&&temp2<=threshFilt)
-	    {
 	    	return false;
-	    }else if(nWidth<=10)
+	    else if(nWidth<=50&&nHeight<=50)
 	    	return false;
 	    else
-	    	return true; 
+	    	return true;
+	    	 
 	}
 	
 	
